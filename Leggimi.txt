@@ -151,3 +151,18 @@ Query testing:
 - Usa lo script come supporto alla ricerca, non come strumento di scraping.
 - Prima di inviare il CV a un'azienda, controlla sempre il sito ufficiale e la pagina careers.
 
+
+
+10. Per cancellare il CSV delle query generate
+----------------------------------------------
+Remove-Item .\Output\search-queries.csv -Force
+
+
+11. Se vuoi rigenerare il CSV delle query da zero:
+--------------------------------------------------
+Remove-Item .\Output\search-queries.csv -Force
+
+
+NOTA!!!!
+--------
+Non cancellare Output\.gitkeep: serve solo a mantenere la cartella Output nel repository GitHub.
