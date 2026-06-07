@@ -10,3 +10,5 @@ Output/*
 .vscode/
 .idea/
 
+# Local brainstorming/mockup artifacts.
+.superpowers/
