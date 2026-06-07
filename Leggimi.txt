@@ -1,0 +1,153 @@
+SearchWork - Comandi PowerShell 7.6.2
+=====================================
+
+Questo progetto contiene uno script PowerShell per aiutare la ricerca assistita
+di aziende partendo da profili LinkedIn con skill simili al proprio stack tecnico.
+
+Lo script NON fa scraping di LinkedIn e NON automatizza il login.
+Genera query, apre le ricerche nel browser e permette di inserire manualmente
+le aziende trovate, salvandole in un file Excel .xlsx apribile con LibreOffice.
+
+
+1. Aprire PowerShell 7.6.2
+-------------------------
+
+Apri PowerShell 7.6.2 e spostati nella cartella del progetto:
+
+  cd D:\test\script\searchWork
+
+
+2. Controllare le query generate
+--------------------------------
+
+Per vedere le query senza aprire il browser:
+
+  .\Search-LinkedInCompanies.ps1 -NoBrowser -ListQueries
+
+Questo comando crea/aggiorna anche:
+
+  Output\search-queries.csv
+
+Il file CSV contiene le query generate e puo' essere aperto con LibreOffice Calc.
+
+
+3. Avviare lo script in modalita' interattiva
+--------------------------------------------
+
+Per avviare il flusso normale:
+
+  .\Search-LinkedInCompanies.ps1
+
+Lo script apre una query nel browser.
+Tu controlli manualmente i profili LinkedIn trovati e, quando trovi un profilo utile,
+inserisci:
+
+  - nome della persona trovata;
+  - URL del profilo LinkedIn;
+  - nome azienda;
+  - sito web aziendale;
+  - skill rilevate;
+  - eventuali note.
+
+Per terminare l'inserimento su una query, lascia vuoto il campo "Nome azienda".
+
+
+4. Avviare senza apertura automatica del browser
+------------------------------------------------
+
+Se vuoi vedere le query e gestire manualmente il browser:
+
+  .\Search-LinkedInCompanies.ps1 -NoBrowser
+
+
+5. Inserire un risultato direttamente da comando
+------------------------------------------------
+
+Esempio:
+
+  .\Search-LinkedInCompanies.ps1 -NoBrowser `
+    -PersonName "Mario Rossi" `
+    -ProfileUrl "https://www.linkedin.com/in/mario-rossi/" `
+    -CompanyName "Azienda Esempio" `
+    -Website "https://www.aziendaesempio.it" `
+    -MatchedSkills "C#; ASP.NET Core; Angular; Azure" `
+    -SearchQuery 'site:linkedin.com/in "ASP.NET Core" "Angular" "Italia"' `
+    -Notes "Profilo simile al mio stack full-stack .NET/Angular"
+
+
+6. Output generati
+------------------
+
+Lo script crea localmente:
+
+  Output\LinkedInCompanyTargets.xlsx
+  Output\state.json
+  Output\search-queries.csv
+
+Il file principale da analizzare e':
+
+  Output\LinkedInCompanyTargets.xlsx
+
+Puoi aprirlo con LibreOffice 25.8 o versione compatibile.
+
+Nota importante:
+la cartella Output e' esclusa da GitHub tramite .gitignore, per evitare di pubblicare
+dati personali, aziende analizzate, note o informazioni sulla ricerca lavoro.
+
+
+7. Deduplica
+------------
+
+Se lanci lo script piu' volte, le aziende gia' presenti non vengono duplicate.
+
+La deduplica usa:
+
+  1. il sito web normalizzato, se presente;
+  2. il nome azienda normalizzato, come fallback.
+
+Esempi considerati equivalenti:
+
+  https://www.azienda.it
+  http://azienda.it
+  azienda.it
+
+Se la stessa azienda viene trovata tramite persone diverse, lo script aggiorna
+lo stesso record aggiungendo i nomi e gli URL dei profili separati da punto e virgola.
+
+
+8. Esempi di query utili
+-----------------------
+
+Query full-stack .NET + Angular:
+
+  site:linkedin.com/in "ASP.NET Core" "Angular" "Italia"
+
+Query backend .NET + Azure:
+
+  site:linkedin.com/in ".NET developer" "Web API" "Azure" "remote"
+
+Query C# + Entity Framework + messaging:
+
+  site:linkedin.com/in "C#" "Entity Framework" "RabbitMQ"
+
+Query microservizi:
+
+  site:linkedin.com/in ".NET" "Docker" "Azure" "microservizi"
+
+Query sicurezza API:
+
+  site:linkedin.com/in "ASP.NET Core Identity" "JWT" "OpenID Connect"
+
+Query testing:
+
+  site:linkedin.com/in ".NET" "xUnit" "Cypress" "Angular"
+
+
+9. Note operative
+-----------------
+
+- Non inserire password, token, chiavi API o dati sensibili nei campi note.
+- Verifica sempre manualmente il sito web aziendale prima di salvarlo.
+- Usa lo script come supporto alla ricerca, non come strumento di scraping.
+- Prima di inviare il CV a un'azienda, controlla sempre il sito ufficiale e la pagina careers.
+
