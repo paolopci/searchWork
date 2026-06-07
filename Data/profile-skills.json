@@ -1,0 +1,73 @@
+{
+  "profileName": "Paolo Paci - Senior .NET Full-Stack Developer",
+  "searchLocale": "Italia",
+  "searchModes": [
+    "remote",
+    "full remote",
+    "hybrid"
+  ],
+  "skills": [
+    ".NET",
+    "C#",
+    "ASP.NET Core",
+    "Web API",
+    "Angular",
+    "TypeScript",
+    "Entity Framework",
+    "LINQ",
+    "SQL Server",
+    "PostgreSQL",
+    "Redis",
+    "Docker",
+    "Azure",
+    "JWT",
+    "OAuth2",
+    "OpenID Connect",
+    "RabbitMQ",
+    "MassTransit",
+    "xUnit",
+    "Cypress"
+  ],
+  "queries": [
+    {
+      "category": "FullStack",
+      "priority": 1,
+      "terms": [ "ASP.NET Core", "Angular", "Italia" ]
+    },
+    {
+      "category": "Backend",
+      "priority": 1,
+      "terms": [ ".NET developer", "Web API", "Azure", "remote" ]
+    },
+    {
+      "category": "Backend",
+      "priority": 2,
+      "terms": [ "C#", "Entity Framework", "RabbitMQ" ]
+    },
+    {
+      "category": "FullStack",
+      "priority": 2,
+      "terms": [ "C#", "Angular", "TypeScript", "Web API" ]
+    },
+    {
+      "category": "CloudDevOps",
+      "priority": 3,
+      "terms": [ ".NET", "Docker", "Azure", "microservizi" ]
+    },
+    {
+      "category": "Security",
+      "priority": 3,
+      "terms": [ "ASP.NET Core Identity", "JWT", "OpenID Connect" ]
+    },
+    {
+      "category": "Testing",
+      "priority": 4,
+      "terms": [ ".NET", "xUnit", "Cypress", "Angular" ]
+    },
+    {
+      "category": "Messaging",
+      "priority": 4,
+      "terms": [ ".NET", "RabbitMQ", "MassTransit" ]
+    }
+  ]
+}

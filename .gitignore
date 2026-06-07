@@ -1,0 +1,12 @@
+# Generated output files. They may contain reviewed people, companies, notes, or job-search state.
+Output/*
+
+# Keep the output folder available locally without publishing collected data.
+!Output/.gitkeep
+
+# PowerShell/editor noise
+*.ps1xml
+*.ps1.log
+.vscode/
+.idea/
+
