@@ -6,7 +6,6 @@
     <title>SearchWork Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="../Output/dashboard-data.js"></script>
 </head>
 <body class="bg-slate-50 text-slate-950">
     <div class="min-h-screen lg:grid lg:grid-cols-[260px_1fr]">
@@ -14,12 +13,13 @@
             <div class="flex items-center justify-between lg:block">
                 <div>
                     <p class="text-lg font-semibold">SearchWork</p>
-                    <p class="mt-1 text-sm text-slate-400">Dashboard aziende</p>
+                    <p class="mt-1 text-sm text-slate-400">Dashboard operativa</p>
                 </div>
                 <p id="lastUpdatedCompact" class="text-right text-xs text-slate-400 lg:mt-8 lg:text-left"></p>
             </div>
             <nav class="mt-6 hidden space-y-2 text-sm text-slate-300 lg:block">
                 <a class="block rounded-md bg-white/10 px-3 py-2 text-white" href="#overview">Overview</a>
+                <a class="block rounded-md px-3 py-2 hover:bg-white/10" href="#queries">Query</a>
                 <a class="block rounded-md px-3 py-2 hover:bg-white/10" href="#charts">Grafici</a>
                 <a class="block rounded-md px-3 py-2 hover:bg-white/10" href="#companies">Aziende</a>
             </nav>
@@ -30,17 +30,20 @@
                 <div>
                     <h1 class="text-2xl font-semibold tracking-tight sm:text-3xl">Analisi risultati LinkedIn</h1>
                     <p class="mt-2 max-w-3xl text-sm text-slate-600">
-                        Lettura read-only dei dati salvati in <code>Output/state.json</code> e <code>Output/search-queries.csv</code>.
+                        Gestione locale assistita di query, aziende, note e file in <code>Output/</code>.
                     </p>
                 </div>
-                <div class="rounded-md border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 shadow-sm">
-                    Snapshot: <span id="snapshotTime" class="font-medium text-slate-900">-</span>
+                <div class="flex flex-wrap gap-2">
+                    <button id="refreshDashboard" type="button" class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Aggiorna</button>
+                    <button id="addCompanyTop" type="button" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">Aggiungi azienda</button>
                 </div>
             </header>
 
+            <div id="toast" class="mb-4 hidden rounded-md border px-4 py-3 text-sm"></div>
+
             <section class="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4" aria-label="Indicatori principali">
                 <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                    <p class="text-sm text-slate-500">Totale aziende</p>
+                    <p class="text-sm text-slate-500">Totale aziende attive</p>
                     <p id="totalCompanies" class="mt-2 text-3xl font-semibold">0</p>
                 </article>
                 <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -48,7 +51,7 @@
                     <p id="companiesWithWebsite" class="mt-2 text-3xl font-semibold">0</p>
                 </article>
                 <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
-                    <p class="text-sm text-slate-500">Query disponibili</p>
+                    <p class="text-sm text-slate-500">Query operative</p>
                     <p id="totalQueries" class="mt-2 text-3xl font-semibold">0</p>
                 </article>
                 <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
@@ -57,13 +60,24 @@
                 </article>
             </section>
 
+            <section id="queries" class="mb-6 rounded-lg border border-slate-200 bg-white shadow-sm">
+                <div class="flex flex-col gap-3 border-b border-slate-200 p-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                        <h2 class="text-base font-semibold">Query di ricerca</h2>
+                        <p class="mt-1 text-sm text-slate-500">Apri ricerche in una pagina browser separata o crea aziende precompilando la query.</p>
+                    </div>
+                    <button id="addQuery" type="button" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">Aggiungi query</button>
+                </div>
+                <div id="queriesList" class="grid gap-3 p-4 xl:grid-cols-2"></div>
+            </section>
+
             <section id="charts" class="mb-6 grid gap-4 xl:grid-cols-2">
                 <article class="rounded-lg border border-slate-200 bg-white p-4 shadow-sm">
                     <div class="mb-4 flex items-center justify-between">
                         <h2 class="text-base font-semibold">Aziende per categoria query</h2>
                         <span class="text-xs text-slate-500">da SearchQuery</span>
                     </div>
-                    <div class="h-72">
+                    <div id="categoryChartWrap" class="h-72">
                         <canvas id="categoryChart"></canvas>
                     </div>
                 </article>
@@ -72,7 +86,7 @@
                         <h2 class="text-base font-semibold">Skill più frequenti</h2>
                         <span class="text-xs text-slate-500">da MatchedSkills</span>
                     </div>
-                    <div class="h-72">
+                    <div id="skillsChartWrap" class="h-72">
                         <canvas id="skillsChart"></canvas>
                     </div>
                 </article>
@@ -114,7 +128,7 @@
                 <div id="emptyState" class="hidden p-10 text-center">
                     <h3 class="text-lg font-semibold">Nessuna azienda salvata</h3>
                     <p class="mx-auto mt-2 max-w-xl text-sm text-slate-500">
-                        Avvia lo script principale per inserire risultati. La dashboard mostrerà automaticamente i dati dopo il prossimo avvio del batch.
+                        Apri una query, trova un profilo utile e inserisci i dati dal form azienda.
                     </p>
                 </div>
 
@@ -129,6 +143,7 @@
                                 <th class="px-4 py-3">Categoria</th>
                                 <th class="px-4 py-3">Note</th>
                                 <th class="px-4 py-3">Date</th>
+                                <th class="px-4 py-3 text-right">Azioni</th>
                             </tr>
                         </thead>
                         <tbody id="companiesTable" class="divide-y divide-slate-100 bg-white"></tbody>
@@ -138,7 +153,91 @@
         </main>
     </div>
 
+    <div id="companyModal" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-950/60 p-4">
+        <form id="companyForm" class="max-h-[90vh] w-full max-w-3xl overflow-y-auto rounded-lg bg-white p-5 shadow-xl">
+            <div class="mb-4 flex items-start justify-between gap-4">
+                <div>
+                    <h2 id="companyFormTitle" class="text-lg font-semibold">Aggiungi azienda</h2>
+                    <p class="mt-1 text-sm text-slate-500">Compila almeno azienda o website.</p>
+                </div>
+                <button type="button" data-close-company class="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">Chiudi</button>
+            </div>
+            <input id="companyId" type="hidden">
+            <div class="grid gap-4 sm:grid-cols-2">
+                <label class="block">
+                    <span class="text-sm font-medium text-slate-700">Azienda</span>
+                    <input id="companyName" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" type="text">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-medium text-slate-700">Website</span>
+                    <input id="companyWebsite" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" type="text">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-medium text-slate-700">Persona</span>
+                    <input id="companyPerson" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" type="text">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-medium text-slate-700">Profilo LinkedIn</span>
+                    <input id="companyProfileUrl" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" type="url">
+                </label>
+                <label class="block sm:col-span-2">
+                    <span class="text-sm font-medium text-slate-700">Skill</span>
+                    <input id="companySkills" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" type="text" placeholder="C#; ASP.NET Core; Angular">
+                </label>
+                <label class="block sm:col-span-2">
+                    <span class="text-sm font-medium text-slate-700">SearchQuery</span>
+                    <textarea id="companySearchQuery" class="mt-1 min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+                </label>
+                <label class="block sm:col-span-2">
+                    <span class="text-sm font-medium text-slate-700">Note</span>
+                    <textarea id="companyNotes" class="mt-1 min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"></textarea>
+                </label>
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" data-close-company class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Annulla</button>
+                <button type="submit" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">Salva</button>
+            </div>
+        </form>
+    </div>
+
+    <div id="queryModal" class="fixed inset-0 z-40 hidden items-center justify-center bg-slate-950/60 p-4">
+        <form id="queryForm" class="w-full max-w-2xl rounded-lg bg-white p-5 shadow-xl">
+            <div class="mb-4 flex items-start justify-between gap-4">
+                <div>
+                    <h2 id="queryFormTitle" class="text-lg font-semibold">Aggiungi query</h2>
+                    <p class="mt-1 text-sm text-slate-500">I termini possono essere separati da punto e virgola.</p>
+                </div>
+                <button type="button" data-close-query class="rounded-md px-2 py-1 text-slate-500 hover:bg-slate-100">Chiudi</button>
+            </div>
+            <input id="queryId" type="hidden">
+            <div class="grid gap-4 sm:grid-cols-[1fr_140px]">
+                <label class="block">
+                    <span class="text-sm font-medium text-slate-700">Categoria</span>
+                    <input id="queryCategory" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" type="text">
+                </label>
+                <label class="block">
+                    <span class="text-sm font-medium text-slate-700">Priorità</span>
+                    <input id="queryPriority" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" type="number" min="1" step="1">
+                </label>
+                <label class="block sm:col-span-2">
+                    <span class="text-sm font-medium text-slate-700">Termini</span>
+                    <textarea id="queryTerms" class="mt-1 min-h-24 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" placeholder="ASP.NET Core; Angular; Italia"></textarea>
+                </label>
+                <label class="flex items-center gap-2 sm:col-span-2">
+                    <input id="queryEnabled" type="checkbox" class="h-4 w-4 rounded border-slate-300" checked>
+                    <span class="text-sm font-medium text-slate-700">Query abilitata</span>
+                </label>
+                <div class="rounded-md bg-slate-50 p-3 text-xs text-slate-600 sm:col-span-2">
+                    Anteprima: <span id="queryPreview" class="font-mono"></span>
+                </div>
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+                <button type="button" data-close-query class="rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-100">Annulla</button>
+                <button type="submit" class="rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700">Salva</button>
+            </div>
+        </form>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
-

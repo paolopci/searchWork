@@ -481,6 +481,10 @@ function Invoke-InteractiveFlow {
     }
 }
 
+$CorePath = Join-Path $ScriptRoot 'SearchWork.Core.ps1'
+. $CorePath
+Initialize-SearchWork -ProjectRoot $ScriptRoot
+
 Ensure-Directories
 $profile = Read-Profile
 $queries = @(Get-SearchQueries -Profile $profile)

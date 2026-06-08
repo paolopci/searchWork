@@ -2,7 +2,7 @@
 setlocal
 
 set "SCRIPT_DIR=%~dp0"
-powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%Dashboard\Start-Dashboard.ps1"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%SCRIPT_DIR%Dashboard\Start-DashboardServer.ps1"
 
 if errorlevel 1 (
     echo.
@@ -10,4 +10,3 @@ if errorlevel 1 (
     pause
     exit /b %errorlevel%
 )
-
